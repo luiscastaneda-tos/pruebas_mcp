@@ -56,6 +56,7 @@ Implementación: [░░░░░░░░░░░░░░░░░░░░] 
 ## 🚦 Bloqueadores Abiertos
 
 **Todos los bloqueadores son queries pendientes de Ángel.** Ver [QUERIES.md](./QUERIES.md).
+Para el contexto completo y las decisiones ya tomadas, ver [HANDOFF.md](./HANDOFF.md).
 
 | Queries pendientes | Bloquea |
 | :--- | :--- |

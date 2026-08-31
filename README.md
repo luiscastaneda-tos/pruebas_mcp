@@ -43,6 +43,7 @@ Ningún consumidor recibe trato especial: todos hablan el mismo contrato REST au
 
 | Documento | Descripción |
 | :--- | :--- |
+| 🤝 [HANDOFF.md](./HANDOFF.md) | **Empieza aquí.** Estado, siguientes pasos y decisiones ya cerradas. |
 | 🏗️ [ARCHITECTURE.md](./ARCHITECTURE.md) | Capas, estructura modular, manejo de errores y despliegue. |
 | 📋 [API_CONTRACT.md](./API_CONTRACT.md) | Contrato de API para consumidores (formato Markdown, sin Swagger). |
 | 🗄️ [QUERIES.md](./QUERIES.md) | **Catálogo de queries autorizadas.** Única fuente de acceso a datos. |
