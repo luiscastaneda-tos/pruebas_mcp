@@ -1,18 +1,22 @@
 # 📊 Tablero de Progreso del Proyecto (PROGRESS.md)
 
-Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de agentes en el **MIA AI Backend Gateway**.
+Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de agentes en el **MIA Backend Gateway**.
 
 ---
 
 ## 📈 Estado General del Proyecto
 
 - **Fase Actual:** `FASE 1: Planeación y Definición Arquitectónica`
-- **Progreso Global:** `15%`
+- **Progreso Global:** `0% de código` (planeación cerrada, implementación sin iniciar)
 - **Última Actualización:** 31 de Agosto de 2026
 
 ```
-[████░░░░░░░░░░░░░░░░] 15% Completado
+Planeación:     [████████████████████] Cerrada
+Implementación: [░░░░░░░░░░░░░░░░░░░░] 0/6 tareas
 ```
+
+> El progreso se mide en **tareas con `npm test` y `npm run build` en verde**, no en checkboxes marcados.
+> Ver [Definition of Done Verificable](./ORCHESTRATION_LOOP.md).
 
 ---
 
@@ -31,9 +35,7 @@ Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de 
 ---
 
 ### 🚧 En Progreso
-| ID | Tarea | Agente | Estado |
-| :--- | :--- | :--- | :--- |
-| `TASK-PLAN` | Planeación de Arquitectura Limpia y Contratos de Tareas | Antigravity (Lead) | **En Revisión con Product Owner** |
+*(Ninguna tarea en progreso — listo para iniciar `TASK-001`)*
 
 ---
 
@@ -43,11 +45,25 @@ Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de 
 ---
 
 ### ✅ Completadas
-- [x] Definición del alcance y separación del Servidor MCP vs. Backend Gateway.
+- [x] Definición del alcance: **este repo es solo el backend**; los MCPs y agentes son clientes externos.
 - [x] Análisis arquitectónico y descarte de sobreingeniería (NestJS vs Express/TS en Vercel).
 - [x] Creación del Contrato de API formal ([API_CONTRACT.md](./API_CONTRACT.md)).
-- [x] Documentación del esquema de base de datos ([DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)).
-- [x] Definición del marco de desarrollo multi-agente ([ORCHESTRATION_LOOP.md](./ORCHESTRATION_LOOP.md)).
+- [x] Definición del modelo de acceso a datos: **el agente no escribe SQL**, las queries las provee Ángel ([QUERIES.md](./QUERIES.md)).
+- [x] Definición del marco de desarrollo multi-agente y DoD verificable ([ORCHESTRATION_LOOP.md](./ORCHESTRATION_LOOP.md)).
+
+---
+
+## 🚦 Bloqueadores Abiertos
+
+**Todos los bloqueadores son queries pendientes de Ángel.** Ver [QUERIES.md](./QUERIES.md).
+
+| Queries pendientes | Bloquea |
+| :--- | :--- |
+| `Q-RES-01`, `Q-RES-02` | `TASK-003` |
+| `Q-CUP-01` … `Q-CUP-04` | `TASK-004` |
+| `Q-VIA-01`, `Q-FIN-01`, `Q-FIN-02` | `TASK-005` |
+
+`TASK-001` y `TASK-002` **no dependen de ninguna query** — son setup y capa core. Se pueden arrancar hoy.
 
 ---
 
@@ -55,6 +71,6 @@ Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de 
 
 | Rol | Agente | Especialidad |
 | :--- | :--- | :--- |
-| 👑 **Lead Orchestrator** | `Antigravity` | Arquitectura, desglose de tasks, code review y verificación de calidad. |
+| 👑 **Lead Orchestrator** | Main Agent | Arquitectura, desglose de tasks, code review y verificación de calidad. |
 | 💻 **Backend Developer** | Subagente `Backend-Dev` | TypeScript, Express, Zod, SQL Repositories y Services. |
 | 🛡️ **Test & QA Specialist** | Subagente `QA-Tester` | Vitest, Supertest, SQL Mocking y validación de cobertura. |

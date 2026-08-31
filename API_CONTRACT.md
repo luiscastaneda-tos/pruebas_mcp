@@ -1,8 +1,8 @@
-# 📋 Contrato de API: MIA AI Gateway
+# 📋 Contrato de API: MIA Backend Gateway
 
 **Versión:** 1.0.0  
 **Formato:** REST / JSON  
-**Consumidor Principal:** Servidor MCP (Model Context Protocol) / Agentes de IA  
+**Consumidores:** Cualquier cliente autenticado (servidores MCP, agentes de IA, frontends, integraciones).  
 **Seguridad:** Header `x-api-key` y contexto de `id_agente`.
 
 ---
@@ -11,10 +11,13 @@
 
 ### Headers de Autenticación y Contexto
 ```http
-x-api-key: <API_KEY_MIA>
+x-api-key: <API_KEY>
 x-id-agente: <ID_AGENTE>
 Content-Type: application/json
 ```
+
+> ⚠️ `id_agente` es un **UUID en formato string** (ej. `ce57342e-03e9-440f-b12f-16497f23b8bb`), no un entero.
+> Todo el filtrado multi-tenant se hace con este valor tomado del header — **nunca del body ni del query string**.
 
 ### Formato de Respuesta Estándar
 ```json

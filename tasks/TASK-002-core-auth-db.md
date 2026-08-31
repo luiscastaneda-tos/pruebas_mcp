@@ -17,10 +17,15 @@ Implementar la infraestructura base: pool de conexiones MySQL con el patrón `ge
 - [ ] `src/core/config/env.ts`: Validación de variables de entorno con Zod al arrancar la app.
 - [ ] `src/core/middleware/auth.ts`:
   - Valida el header `x-api-key`.
-  - Extrae y valida `x-id-agente` (o query/header) y lo inyecta en `req.context.id_agente`.
-  - Rechaza con 401 si falta la API Key o con 400 si falta el `id_agente`.
+  - Extrae `x-id-agente` **exclusivamente del header** y lo inyecta en `req.context.id_agente`.
+  - Valida que sea un UUID en formato string (**no** un entero).
+  - Rechaza con 401 si falta la API Key o con 400 si falta / es inválido el `id_agente`.
+
+> 🔒 **Regla de aislamiento:** el `id_agente` **nunca** se lee del body, del query string ni de los params.
+> Aceptarlo desde ahí permitiría a un cliente consultar datos de otra agencia. Los repositorios lo reciben
+> únicamente desde `req.context`.
 - [ ] `src/core/errors/`: Clases de error tipadas (`AppError`, `ValidationError`, `NotFoundError`, `UnauthorizedError`).
-- [ ] `src/core/middleware/errorHandler.ts`: Manejador global que formatea respuestas consistentes para el MCP.
+- [ ] `src/core/middleware/errorHandler.ts`: Manejador global que formatea respuestas consistentes para cualquier cliente.
 - [ ] Tests unitarios de autenticación y manejo de errores pasando al 100%.
 
 ---
