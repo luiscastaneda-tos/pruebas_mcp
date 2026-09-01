@@ -1,6 +1,8 @@
 # 🤖 Loop de Desarrollo Multi-Agente (Orchestration Loop)
 
-Este documento define el modelo de trabajo para construir el backend mediante un **Loop de Agentes Autónomos** coordinados por Antigravity (Orquestador / Lead Architect).
+Este documento define el modelo de trabajo para construir el backend mediante un **Loop de Agentes Autónomos** coordinados por un Orquestador / Lead Architect.
+
+> Alcance: este loop construye **el backend de este repo**. Los clientes que lo consumen (servidores MCP, agentes, frontends) están fuera del alcance de estas tareas.
 
 ---
 
@@ -55,24 +57,43 @@ Para cada funcionalidad (ej. Módulo de Reservas, Módulo de Cupones):
 
 ---
 
-## 3. Backlog Inicial de Tareas
+## 3. Backlog de Tareas
 
-1. **TASK-01: Setup del Proyecto**
-   - `package.json`, `tsconfig.json`, dependencias (`express`, `zod`, `mysql2`, `dotenv`, `cors`, `vitest`).
-   - Configuración serverless de Vercel (`api/index.ts` + `vercel.json`).
-   - Pool de base de datos (`config/db.ts`) con patrón `getExecutor(conn)`.
-2. **TASK-02: Middleware de Seguridad & Multi-Tenant**
-   - Validación de `x-api-key`.
-   - Inyección y validación de `id_agente` en `req.context`.
-   - `errorHandler` global con `CustomError`.
-3. **TASK-03: Módulo Reservas (`/reservas`)**
-   - Repositorio sobre `vw_new_details_booking` con filtros de temporalidad (`proximas`/`pasadas`).
-   - Controlador y Service con Zod.
-   - Tests de integración.
-4. **TASK-04: Módulo Cupones (`/cupones`)**
-   - Adaptación de la lógica de `v2/cupon` para resolver `sol-...` y bookings individuales.
-   - Tests de integración.
-5. **TASK-05: Módulos Viajeros y Finanzas**
-   - Queries optimizadas para viajeros por agente.
-   - Consulta consolidada de wallet y línea de crédito.
-   - Tests de integración.
+La especificación completa de cada tarea vive en [`tasks/`](./tasks/). El estado actual se sigue en [PROGRESS.md](./PROGRESS.md).
+
+| ID | Tarea | Depende de |
+| :--- | :--- | :--- |
+| [TASK-001](./tasks/TASK-001-setup.md) | Setup del proyecto y entorno Vercel | — |
+| [TASK-002](./tasks/TASK-002-core-auth-db.md) | Capa core: DB, errores y middleware auth | TASK-001 |
+| [TASK-003](./tasks/TASK-003-reservas.md) | Módulo Reservas | TASK-002 |
+| [TASK-004](./tasks/TASK-004-cupones.md) | Módulo Cupones | TASK-003 |
+| [TASK-005](./tasks/TASK-005-viajeros-finanzas.md) | Módulos Viajeros y Finanzas | TASK-002 |
+| [TASK-006](./tasks/TASK-006-integration-tests.md) | Suite de pruebas de integración | TASK-005 |
+
+---
+
+## 4. Definition of Done Verificable
+
+Una tarea **no se marca completa** por checkbox. Se marca completa cuando:
+
+1. `npm run build` compila sin errores de TypeScript.
+2. `npm test` pasa — y la suite **es capaz de fallar** (ver regla anti-mock abajo).
+3. Los archivos entregables listados en la tarea existen en disco.
+
+### Regla anti-mock (crítica para el loop)
+
+Un agente que escribe el mock y el test contra su propio mock produce tests verdes que no prueban nada. Para evitarlo:
+
+- Los fixtures de datos **se derivan de filas reales** de la DB de MIA (anonimizadas), no se inventan.
+- Todo test de repositorio debe verificar el **SQL generado y sus parámetros**, no solo la respuesta mockeada.
+- Todo módulo debe incluir al menos un test negativo: consulta **sin** `id_agente` → debe fallar; filtro requerido ausente → debe fallar con 400.
+
+### El agente no escribe SQL
+
+**Los agentes no conocen la base de datos.** No hay esquema, DDL ni tablas documentadas en este repo — a propósito.
+
+Todas las queries las provee Ángel y viven en [QUERIES.md](./QUERIES.md). El repositorio las ejecuta con parámetros seguros y mapea las filas; nada más.
+
+Si una tarea necesita datos sin query aprobada, el agente **detiene la tarea** y emite una *Solicitud de Query* ([QUERIES.md §3](./QUERIES.md)). No inventa SQL, no propone un esquema, no deja un stub para "avanzar mientras tanto".
+
+Esto es lo que hace que el loop sea seguro de correr sin supervisión continua: el punto donde un agente autónomo más fácilmente produce daño invisible — SQL plausible contra un esquema que no conoce — está cerrado por diseño.

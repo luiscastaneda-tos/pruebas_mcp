@@ -24,3 +24,4 @@ Cada archivo de tarea contiene:
 * [TASK-003: Módulo Reservas (`vw_new_details_booking`)](./TASK-003-reservas.md)
 * [TASK-004: Módulo Cupones (Basado en `v2/cupon`)](./TASK-004-cupones.md)
 * [TASK-005: Módulos Viajeros y Finanzas](./TASK-005-viajeros-finanzas.md)
+* [TASK-006: Suite de Pruebas de Integración y Mocks SQL](./TASK-006-integration-tests.md)
