@@ -1,113 +1,153 @@
-# 🤝 HANDOFF — Estado y Siguientes Pasos
+# 🤝 HANDOFF — MIA Backend Gateway
 
-**Última actualización:** 31 de Agosto de 2026
-**Estado:** Planeación cerrada. Implementación sin iniciar. Bloqueada parcialmente por entrega de queries.
+**Última actualización:** 1 de septiembre de 2026  
+**Repositorio:** `C:\Users\Operaciones\Desktop\MIA_OFICIAL\pruebas_mcp`  
+**Estado:** pausa solicitada durante TASK-002b. Progreso aceptado: **2/7 tareas**.
 
-> **Empieza por aquí** si retomas el proyecto después de un tiempo, o si eres un agente
-> entrando en frío. Este archivo tiene el *contexto y las decisiones*.
-> El *estado vivo* está en [QUERIES.md](./QUERIES.md) y [PROGRESS.md](./PROGRESS.md) —
-> este documento no lo duplica, lo apunta.
-
----
-
-## 1. Qué es esto en una frase
-
-Un **backend REST en TypeScript** con arquitectura limpia, que se conecta a la DB de MIA y expone
-endpoints tipados y compactos. Los servidores MCP y agentes de IA son **clientes externos** que lo
-consumen; no se construyen aquí.
+> Este archivo es el punto de entrada para un nuevo Lead Orchestrator. Lee después únicamente
+> `PROGRESS.md`, la tarea activa y las secciones contractuales que esa tarea enlace. No recorras todo
+> el repositorio ni releas la historia completa.
+>
+> Prompt listo para copiar al nuevo agente: [`NEXT_ORCHESTRATOR_PROMPT.md`](./NEXT_ORCHESTRATOR_PROMPT.md).
 
 ---
 
-## 2. Ruta crítica: 9 queries pendientes de Ángel
+## 1. Alcance y reglas no negociables
 
-**Esto es lo único que bloquea el proyecto.** El estado real y actualizado está en
-[QUERIES.md §1](./QUERIES.md) — no lo copies aquí, se desincroniza.
+- Este repositorio construye **solo el backend REST** TypeScript/Express para Vercel. MCPs, agentes y
+  frontends son clientes externos.
+- Ningún agente escribe, corrige ni inventa SQL. Ángel entrega las queries y la única fuente es
+  `QUERIES.md`.
+- No existe `DATABASE_SCHEMA.md` y **no debe crearse**. Tampoco se adapta SQL del legacy `bacl`.
+- Backend nunca lee ni ejecuta `tests/`. QA deriva pruebas de contratos; solo el Lead ejecuta e
+  interpreta la suite completa y realiza mutaciones.
+- `id_agente` vigente es UUID string tomado exclusivamente de `x-id-agente`, nunca de body, query o
+  params. También se valida `x-api-key`.
+- La futura migración a token está preparada mediante
+  `ContextResolver.resolve(req): Promise<RequestContext>`, pero hoy no se acepta `Authorization`,
+  modo dual ni fallback.
+- El gate usa una allowlist sintáctica estricta: queries como strings literales exportados y
+  repositorios mediante `executor.execute(CONSTANTE_IMPORTADA, params)`.
+- Máximo tres iteraciones sobre el mismo comportamiento. Después se escala a Ángel.
 
-| Bloque | Desbloquea |
+---
+
+## 2. Política actual de agentes y costo
+
+- Usa únicamente subagentes económicos, actualmente equivalentes a `gpt-5.6-luna`.
+- No les pidas releer el proyecto. Entrega brief ya cargado + tarea atómica + secciones exactas.
+- QA trabaja por lotes:
+  - Lote A: TASK-002b y, después de cerrarla, tests previos de TASK-003.
+  - Lote B: TASK-004/005/006 cuando lleguen las siete queries restantes.
+- Security permanece estacionado. Se invoca una sola vez después de TASK-006 y antes de liberar,
+  salvo petición extraordinaria de Ángel.
+- Agentes usados en la sesión anterior: `qa_economico` y `backend_economico`. Un nuevo orquestador
+  probablemente tendrá que recrearlos con modelo económico y los briefs íntegros de `agents/`.
+
+---
+
+## 3. Tareas completadas
+
+### TASK-001 — COMPLETED
+
+- Setup TypeScript/Express/Vercel, `GET /health` y gate de invariantes.
+- Cierre aceptado: build, lint, invariantes y suite verdes; mutación roja y revertida; 9/9
+  entregables.
+- Security realizó dos auditorías tempranas que endurecieron health y el gate. Ya no se audita cada
+  tarea.
+
+### TASK-002 — COMPLETED
+
+- DB/pool y `QueryExecutor`, env Zod, errores tipados, `errorHandler`, auth y `ContextResolver`.
+- Cierre aceptado: 6 archivos/28 pruebas verdes, build/lint/invariantes verdes, 7/7 entregables.
+- Mutación verificada: relajar UUID de `x-id-agente` puso la suite roja; la reversión volvió a verde.
+- Un único fallo real requirió Backend: todo `INTERNAL_ERROR`, incluso tipado, debe loguearse sin
+  exponer detalles.
+
+No repitas estas dos tareas.
+
+---
+
+## 4. Estado exacto de TASK-002b
+
+**Estado:** pausada antes del cierre. Los entregables QA existen:
+
+- `tests/helpers/mockExecutor.ts`
+- `tests/helpers/catalogIntegrity.ts`
+- `tests/fixtures/README.md`
+- `tests/core/multiTenant.test.ts`
+- `tests/core/errorShape.test.ts`
+- `tests/core/infrastructure.test.ts` — prueba realmente los dos helpers.
+
+QA corrigió su primera entrega porque inicialmente los helpers no tenían pruebas ejecutables. Después
+de la corrección quedaron cubiertos:
+
+- `execute`, orden y captura exacta de `{ sql, params }`, `queueRows`, `reset` y comparación de query;
+- extracción carácter por carácter de `Q-RES-01` y `Q-RES-02` y error para ID inexistente;
+- UUID inválido, prioridad del header frente a body/query/params y bloqueo de downstream sin contexto;
+- forma contractual de errores y `details` solo para `VALIDATION_ERROR`.
+
+### Hashes QA que deben permanecer intactos
+
+| Archivo | SHA-256 |
 | :--- | :--- |
-| `Q-RES-01`, `Q-RES-02` | `TASK-003` (Reservas) |
-| `Q-CUP-01` … `Q-CUP-04` | `TASK-004` (Cupones) |
-| `Q-VIA-01`, `Q-FIN-01`, `Q-FIN-02` | `TASK-005` (Viajeros y Finanzas) |
+| `tests/helpers/mockExecutor.ts` | `6C25837DB9F096ABCDF9060BC9DAC20F1EF92BC60EC811ED19B2F28899123150` |
+| `tests/helpers/catalogIntegrity.ts` | `DF490076B0FA071670841815AF758D50E2E88C64B2A8EDC183111031BADC1A00` |
+| `tests/fixtures/README.md` | `A3A62F4010F95B2B6629FAB158D4B7EA8A4925BED77CF37237571B19CF0647DB` |
+| `tests/core/multiTenant.test.ts` | `93B9CAE0E9739D32BFD50E688EC69BAC6B17BED21E79DAA42DBA8CC58C46E8CB` |
+| `tests/core/errorShape.test.ts` | `8B9CE752D143A79BA1AF5164F759A6AC7B24E5B447F6CE30E7D0673E6215D440` |
+| `tests/core/infrastructure.test.ts` | `879456F03DB3458DE0F59FD4E7D5946E006F816B7D9264B996C45FCA1A678FF5` |
 
-**Cómo entregarlas:** con el formato de [QUERIES.md §2](./QUERIES.md) — SQL, params posicionales,
-forma de la fila devuelta, y reglas de negocio que la query ya resuelve. Ese último punto importa:
-si la query ya filtra o calcula algo, el service **no** lo reimplementa.
+### Bloqueo actual: health intermitente
 
-**Sugerencia de orden:** empieza por `Q-RES-01` / `Q-RES-02`. Reservas es el módulo central, y
-entregarlo primero valida el formato del catálogo end-to-end antes de que escribas las otras siete.
+El caso de `GET /health` con body JSON sobredimensionado produjo `read ECONNRESET` tres veces en
+corridas distintas, aunque otras corridas fueron verdes. La causa diagnosticada es responder antes
+de terminar de recibir el stream del request.
 
----
+Backend económico recibió esta regla: health debe drenar el stream sin parsearlo ni almacenarlo antes
+de responder. Alcanzó a modificar `src/app.ts` con una ruta async que hace `request.resume()` y espera
+`end`/`close`, pero fue **interrumpido antes de entregar o validar**. Ese código es parcial y no debe
+aceptarse todavía.
 
-## 3. Qué se puede hacer HOY sin bloqueo
-
-`TASK-001` (setup + Vercel) y `TASK-002` (core: DB pool, auth, errores) **no tocan datos de negocio**
-y no dependen de ninguna query. Ese es el tramo que el loop puede correr sin que entregues nada.
-
-Al terminar `TASK-002` existe ya un `GET /health` desplegable y el middleware multi-tenant probado —
-buen punto de corte para revisar antes de seguir.
-
----
-
-## 4. Decisiones cerradas — no re-litigar
-
-Están aquí porque son la clase de decisión que una sesión nueva vuelve a proponer al revés.
-
-| # | Decisión | Por qué |
-| :-- | :--- | :--- |
-| 1 | **Este repo es solo el backend.** El servidor MCP no se construye aquí. | El scope se había mezclado; `.env.example` describía un cliente MCP mientras el README describía un backend. Ya está separado. |
-| 2 | **El agente no escribe SQL ni conoce el esquema.** Ángel provee todas las queries. | Un agente que inventa SQL contra un esquema que no conoce falla en runtime, o peor: devuelve datos incorrectos en silencio o rompe el aislamiento multi-tenant. Ninguno de los tres lo detecta un test escrito por ese mismo agente. |
-| 3 | **No se documenta DDL en este repo.** Es deliberado, no un olvido. | Documentar esquema le da material al agente para inventar queries en vez de pedirlas. Si ves que falta un `DATABASE_SCHEMA.md`, es intencional — no lo crees. |
-| 4 | **`id_agente` solo desde el header `x-id-agente`.** Nunca de body, query o params. | Leerlo del query permitiría a un cliente consultar datos de otra agencia. |
-| 5 | **`id_agente` es un UUID string**, no un entero. | Verificado en el legacy. La doc original decía `INT` y usaba `50` de ejemplo; habría producido validación numérica en Zod y roto todo. |
-| 6 | **Progreso se mide en `npm test` + `npm run build` en verde**, no en checkboxes. | Un loop autónomo marca checkboxes solo. Ver [DoD verificable](./ORCHESTRATION_LOOP.md). |
+No se ejecutaron build, lint, invariantes ni suite después de ese último cambio.
 
 ---
 
-## 5. Lo que un agente nuevo NO debe hacer
+## 5. Primeros pasos exactos del nuevo orquestador
 
-Errores concretos en los que ya se cayó una vez:
-
-- ❌ **Escribir SQL "provisional" para desbloquearse.** Emite una *Solicitud de Query*
-  ([QUERIES.md §3](./QUERIES.md)) y **detén la tarea**.
-- ❌ **Adaptar queries del backend legacy `bacl`.** No son la fuente de verdad; varias traen
-  `SELECT *` y lógica que aquí se quiere rediseñar. Ángel entrega la versión buena.
-- ❌ **Documentar el esquema "para ayudar".** Ver decisión #3.
-- ❌ **Modificar una query del catálogo** (agregar un filtro, cambiar un JOIN o un `ORDER BY`).
-  Eso es una solicitud nueva, no una edición.
-- ❌ **Reimplementar en el service reglas que la query ya aplica.**
-- ❌ **Proponer construir el servidor MCP aquí.** Ver decisión #1.
-
----
-
-## 6. Preguntas abiertas
-
-Decisiones que siguen sin tomarse. Ninguna bloquea `TASK-001` / `TASK-002`.
-
-- [ ] **Nombre del repo.** Se llama `pruebas_mcp` pero ya no es eso ni tiene MCP dentro.
-      Algo como `mia-backend-gateway` describiría lo que es. No se renombró para no romperte
-      remotes sin avisar.
-- [ ] **Relación con `bacl/v2`.** El backend legacy ya tiene el mismo patrón
-      (repository/service/controller/router, `getExecutor(conn)`, QueryBuilder + Includes) y
-      endpoints funcionando para los 4 módulos. Se decidió construir aparte de todos modos.
-      Queda pendiente definir: ¿este backend eventualmente reemplaza esos endpoints de `bacl`,
-      conviven, o `bacl` termina llamando a este? Sin respuesta, hay riesgo de mantener dos
-      lugares con la misma lógica.
-- [ ] **Origen de los fixtures de prueba.** `TASK-006` los construye a partir de la "forma de la
-      fila" que documenta cada query. Falta confirmar si se anonimizan datos reales o se
-      generan sintéticos desde esa forma.
-- [ ] **Rotación de `API_KEY`.** El contrato asume una sola API key para todos los clientes.
-      Si mañana hay varios MCPs, ¿una key por cliente?
+1. No modifiques ni descartes el worktree: está intencionalmente sucio y contiene todo el proyecto.
+2. Crea/reactiva Backend con modelo económico y brief íntegro `agents/BACKEND.md`. Entrégale solo la
+   corrección parcial de health; prohíbele tests y SQL. Debe revisar `src/app.ts` y entregar
+   `npm run build`, `npm run lint`, `npm run check:invariants`.
+3. Como Lead, calcula los hashes anteriores y ejecuta esos tres controles.
+4. Solo entonces ejecuta `npm test`.
+   - Si health sigue con `ECONNRESET`, devuelve la misma regla a Backend como **iteración 2/3**.
+   - No reactives QA por este fallo.
+5. Con la suite verde, muta temporalmente `mockExecutor` para dejar de capturar `params`. La prueba de
+   infraestructura debe ponerse roja. Revierte y confirma suite verde.
+6. Marca TASK-002b completa y cambia el progreso a **3/7**.
+7. Reactiva QA económico una sola vez para escribir, antes de Backend, los tests de TASK-003 usando
+   únicamente `tasks/TASK-003-reservas.md`, `API_CONTRACT.md` sección Reservas y `Q-RES-01/02`.
 
 ---
 
-## 7. Cómo reanudar
+## 6. Queries y ruta restante
 
-1. Lee este archivo (§4 y §5 sobre todo).
-2. Revisa [QUERIES.md §1](./QUERIES.md) — ¿cuántas queries siguen en ⏳?
-3. Revisa [PROGRESS.md](./PROGRESS.md) — ¿qué tarea quedó en curso?
-4. Si hay queries nuevas entregadas, muévelas a ✅ y desbloquea su tarea.
-5. Si no, arranca o continúa `TASK-001` / `TASK-002`, que nunca están bloqueadas.
+- Aprobadas: `Q-RES-01` y `Q-RES-02`. Incluyen SQL, parámetros, filas anonimizadas y reglas.
+- TASK-003 queda desbloqueada por datos cuando TASK-002b cierre.
+- Pendientes de Ángel:
+  - `Q-CUP-01` a `Q-CUP-04` para TASK-004.
+  - `Q-VIA-01`, `Q-FIN-01`, `Q-FIN-02` para TASK-005.
+- Después: TASK-006 consolida cobertura y luego Security realiza la auditoría acumulada final.
 
-**Al cerrar una sesión de trabajo:** actualiza §2 si cambió el estado de las queries, y §6 si se
-resolvió o apareció una pregunta abierta. El resto de este archivo casi no debería cambiar — si
-estás editando §4 seguido, es señal de que una decisión no estaba realmente cerrada.
+---
+
+## 7. Documentos que sí importan al retomar
+
+1. Este `HANDOFF.md`.
+2. `PROGRESS.md` para el tablero y evidencia cronológica.
+3. `tasks/TASK-002b-testing-infra.md` hasta cerrar la tarea activa.
+4. `ORCHESTRATION_LOOP.md` para segregación, mutación y política económica por lotes.
+5. Después del cierre, solo la tarea y secciones contractuales de TASK-003.
+
+No es necesario leer toda la documentación otra vez.

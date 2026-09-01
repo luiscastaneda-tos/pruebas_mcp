@@ -1,19 +1,25 @@
-# 📋 TASK-006: Suite de Pruebas de Integración y Estrategia de Mocks SQL
+# 📋 TASK-006: Consolidación de la Suite y Cobertura
 
 - **Estado:** `BACKLOG`
-- **Agente Asignado:** `Test & QA Agent`
-- **Revisor:** `Lead Orchestrator`
+- **Agente Asignado:** `QA`
+- **Revisor:** `Lead`
 - **Dependencias:** `TASK-005`
 
 ---
 
 ## 1. Objetivo
 
-Consolidar la suite de pruebas del backend y establecer la **estrategia de mocking de MySQL** que usarán todos los módulos, garantizando que los tests puedan fallar de verdad y no solo validen los mocks que el propio agente escribió.
+Consolidar la suite completa una vez que los cuatro módulos existen: cobertura, tests de integración transversales y verificación de que la estrategia definida en [TASK-002b](./TASK-002b-testing-infra.md) se aplicó de forma consistente en todos ellos.
+
+> **Qué NO está aquí.** El `mockExecutor`, la convención de fixtures y el test de integridad del
+> catálogo se construyen en [TASK-002b](./TASK-002b-testing-infra.md), **antes** del primer módulo.
+> Esta tarea no los inventa: verifica que se usaron.
 
 ---
 
-## 2. Estrategia de Testing
+## 2. Estrategia de Testing (referencia)
+
+Definida en TASK-002b y aplicada por cada módulo. Se repite aquí porque es el criterio de revisión:
 
 | Capa | Tipo de prueba | Qué se mockea |
 | :--- | :--- | :--- |
@@ -24,44 +30,49 @@ Consolidar la suite de pruebas del backend y establecer la **estrategia de mocki
 > El agente **no valida el SQL en sí** — no conoce el esquema y no puede juzgarlo.
 > Valida que se ejecute la query correcta, sin modificar, con los parámetros correctos.
 
-### Fixtures
-
-- Viven en `tests/fixtures/`, un archivo por entidad.
-- Se construyen **a partir de la "Forma de la fila devuelta"** que cada query documenta en [QUERIES.md §2](../QUERIES.md).
-- **Prohibido inventar campos.** Si el DTO del contrato necesita un dato que ninguna query documenta, se emite una *Solicitud de Query* y la tarea se detiene.
-
 ---
 
 ## 3. Criterios de Aceptación (Definition of Done)
 
-- [ ] `tests/helpers/mockExecutor.ts`: helper que captura `{ sql, params }` de cada llamada para poder afirmar sobre ellos.
-- [ ] `tests/fixtures/`: fixtures de reservas, cupones (hotel/vuelo/auto), viajeros y finanzas.
-- [ ] **Test de integridad del catálogo:** el SQL que ejecuta cada repositorio es **idéntico** al de [QUERIES.md](../QUERIES.md). Si alguien lo edita, el test falla.
-- [ ] **Tests de aislamiento multi-tenant** (obligatorio en cada módulo):
-  - El primer parámetro enviado a la query es el `id_agente` del contexto autenticado.
-  - Ese valor **nunca** proviene del body, del query string ni de los params de la petición.
-  - Una petición sin `x-id-agente` responde 400 y no llega al repositorio.
-  - Una petición sin `x-api-key` responde 401.
-- [ ] **Tests negativos por módulo:** filtros requeridos ausentes (ej. `temporalidad` en reservas) responden 400.
+- [ ] **Auditoría de consistencia:** los cuatro módulos usan el `mockExecutor` de TASK-002b. Ningún módulo trae un mock propio improvisado. Si alguno lo tiene, se migra.
+
+- [ ] **Test de integridad del catálogo, extendido a todas las queries:** el SQL de cada repositorio es idéntico carácter por carácter al de [QUERIES.md](../QUERIES.md), para las 9 queries.
+
+- [ ] **Auditoría de fixtures:** cada fixture procede de las "Filas de ejemplo" de su query en el catálogo. **Ningún fixture contiene campos que ninguna query documenta.**
+
+- [ ] **Tests de aislamiento multi-tenant, por módulo** (los de la capa core ya están en TASK-002b):
+  - El primer parámetro enviado a cada query es el `id_agente` del contexto autenticado.
+  - Ese valor nunca proviene del body, del query string ni de los params.
+  - Ningún endpoint responde datos sin que el `id_agente` haya llegado al repositorio.
+
+- [ ] **Tests negativos por módulo:** filtros requeridos ausentes (ej. `temporalidad` en reservas) responden `400 VALIDATION_ERROR` con la forma de error de [API_CONTRACT §1](../API_CONTRACT.md).
+
 - [ ] **Test de paginación:** `length` mayor al máximo permitido se recorta al tope, no lo excede.
-- [ ] `npm test` corre toda la suite en verde y `npm run build` compila sin errores.
+
+- [ ] **Test de recurso ajeno:** pedir un cupón que pertenece a otro `id_agente` responde `404 NOT_FOUND`, no `403` ni el recurso.
+
+- [ ] `vitest.config.ts` con umbrales de cobertura y script `test:coverage` en `package.json`.
+
 - [ ] Cobertura mínima del 80% en `src/modules/` y `src/core/`.
+
+- [ ] `npm test` en verde, `npm run build` sin errores, `npm run check:invariants` en verde.
 
 ---
 
 ## 4. Entregables
 
-1. `tests/helpers/mockExecutor.ts`
-2. `tests/fixtures/` (reservas, cupones, viajeros, finanzas)
-3. `tests/integration/multiTenant.test.ts`
-4. `vitest.config.ts` con umbrales de cobertura configurados
-5. Script `test:coverage` en `package.json`
+1. `tests/integration/multiTenant.test.ts` (transversal, los 4 módulos)
+2. `tests/integration/catalogIntegrity.test.ts` (las 9 queries)
+3. `vitest.config.ts` con umbrales de cobertura configurados
+4. Script `test:coverage` en `package.json`
 
 ---
 
-## 5. Checklist de Verificación del Orquestador
+## 5. Checklist de Verificación del Lead
 
-- [ ] ¿Existe al menos un test que falle si el repositorio deja de pasar el `id_agente` del contexto?
+- [ ] ¿Existe al menos un test que falle si un repositorio deja de pasar el `id_agente` del contexto?
 - [ ] ¿El SQL de cada repositorio coincide **carácter por carácter** con el del catálogo?
 - [ ] ¿Aparece SQL escrito por el agente en algún archivo? (si sí → **rechazar la tarea completa**)
 - [ ] ¿Algún fixture contiene campos que ninguna query documenta? (si sí → rechazar)
+- [ ] ¿Algún módulo se quedó con un mock propio en vez del helper compartido?
+- [ ] **Verificación de mutación** ([ORCHESTRATION_LOOP §2.3](../ORCHESTRATION_LOOP.md)): con la cobertura al 80%, ¿sigue habiendo una mutación que la suite detecta en cada módulo?

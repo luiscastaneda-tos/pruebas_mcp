@@ -1,5 +1,63 @@
-node_modules
-dist
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Entorno — NUNCA se commitean credenciales.
+# Solo .env.example va al repo, con valores de plantilla.
 .env
-.DS_Store
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# Vercel
+.vercel/
+
+# Tests y cobertura
+coverage/
+.nyc_output/
+*.lcov
+
+# Caches de herramientas
+.eslintcache
+.cache/
+.vitest/
+.turbo/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Datos sensibles del dominio
+# Volcados, exports o fixtures con datos reales sin anonimizar. Los fixtures del
+# repo se construyen SOLO desde las filas de ejemplo anonimizadas de QUERIES.md.
+*.sql.gz
+*.dump
+dumps/
+data-real/
+*.csv
+!tests/fixtures/**/*.csv

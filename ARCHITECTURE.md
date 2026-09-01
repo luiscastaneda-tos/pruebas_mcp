@@ -52,7 +52,7 @@ src/
   ├── core/                              # Capa transversal y utilidades base
   │     ├── config/                      # Variables de entorno y DB pool
   │     ├── errors/                      # Jerarquía de errores de dominio (AppError, NotFoundError, UnauthorizedError)
-  │     ├── middleware/                  # Auth (x-api-key + id_agente), request tracing
+  │     ├── middleware/                  # Auth + ContextResolver, request tracing
   │     └── types/                       # Tipos globales y Contexto de petición
   │
   ├── modules/                           # Módulos de dominio (Vertical Slices)
@@ -72,10 +72,27 @@ src/
   └── server.ts                          # Entrada local
 api/
   └── index.ts                           # Entrada Serverless para Vercel
-tests/                                   # Suite de pruebas automatizadas (Vitest)
-  ├── unit/
+scripts/
+  └── check-invariants.mjs               # Gate mecánico de acceso a datos (npm run check:invariants)
+tests/                                   # Suite de pruebas — territorio de QA. Backend no entra.
+  ├── helpers/                           # mockExecutor, catalogIntegrity
+  ├── fixtures/                          # Un archivo por query, copiado del catálogo
+  ├── core/
+  ├── modules/
   └── integration/
 ```
+
+### Frontera estable de identidad
+
+El middleware de autenticación se construye con un `ContextResolver`. El resolver vigente valida
+`x-api-key` y `x-id-agente`; después de resolverlos, el resto del sistema solo recibe
+`req.context = { id_agente }`. Controladores, servicios y repositorios no leen credenciales ni conocen
+su procedencia.
+
+Una futura migración a `Authorization: Bearer` reemplazará el resolver por uno que verifique el token
+y devuelva la misma forma de contexto. No habrá modo dual o fallback implícito: habilitar el nuevo
+resolver exige una revisión del contrato y pruebas específicas de firma, emisor, audiencia, vigencia y
+claims. Esta separación prepara la migración sin implementar seguridad ficticia antes de tiempo.
 
 ---
 

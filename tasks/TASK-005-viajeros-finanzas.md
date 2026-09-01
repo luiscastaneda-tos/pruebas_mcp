@@ -1,9 +1,9 @@
 # 📋 TASK-005: Módulos de Viajeros y Finanzas (Optimización de Queries)
 
 - **Estado:** `BACKLOG`
-- **Agente Asignado:** `Backend Dev Agent` & `Test & QA Agent`
-- **Revisor:** `Antigravity (Lead Orchestrator)`
-- **Dependencias:** `TASK-002`
+- **Agente Asignado:** `Backend` & `QA`
+- **Revisor:** `Lead`
+- **Dependencias:** `TASK-002b`
 
 ---
 

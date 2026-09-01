@@ -48,7 +48,12 @@ Ningún consumidor recibe trato especial: todos hablan el mismo contrato REST au
 | 📋 [API_CONTRACT.md](./API_CONTRACT.md) | Contrato de API para consumidores (formato Markdown, sin Swagger). |
 | 🗄️ [QUERIES.md](./QUERIES.md) | **Catálogo de queries autorizadas.** Única fuente de acceso a datos. |
 | 🤖 [ORCHESTRATION_LOOP.md](./ORCHESTRATION_LOOP.md) | Flujo de desarrollo iterativo con agentes y tareas atómicas. |
+| 👥 [agents/](./agents/) | Briefs de cada rol del loop. [LEAD.md](./agents/LEAD.md) es el prompt que arranca el proyecto. |
 | 📊 [PROGRESS.md](./PROGRESS.md) | Tablero de estado de tareas y avance. |
+| 📁 [tasks/](./tasks/) | Especificación atómica de cada tarea. |
+
+> No existe `DATABASE_SCHEMA.md`, y es deliberado — ver [HANDOFF §4, decisión 3](./HANDOFF.md).
+> Documentar el esquema le daría a los agentes material para inventar queries en vez de pedirlas.
 
 ---
 
@@ -57,7 +62,7 @@ Ningún consumidor recibe trato especial: todos hablan el mismo contrato REST au
 ```mermaid
 graph LR
     subgraph "MIA Backend Gateway"
-        M1["/reservas<br/>(vw_new_details_booking)"]
+        M1["/reservas<br/>(hotel, vuelo, auto)"]
         M2["/cupones<br/>(hotel, vuelo, auto)"]
         M3["/viajeros<br/>(directorio por agente)"]
         M4["/finanzas<br/>(wallet y crédito)"]
