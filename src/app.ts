@@ -3,6 +3,8 @@ import express from "express";
 
 import { HeaderContextResolver, createAuthMiddleware } from "./core/middleware/auth.js";
 import { errorHandler } from "./core/middleware/errorHandler.js";
+import { cuponesRouter } from "./modules/cupones/cupones.router.js";
+import { reservasRouter } from "./modules/reservas/reservas.router.js";
 
 export const app = express();
 
@@ -27,6 +29,8 @@ app.get("/health", async (request, response) => {
 
 app.use(express.json());
 app.use(createAuthMiddleware(new HeaderContextResolver()));
+app.use("/api/v1/reservas", reservasRouter);
+app.use("/api/v1/cupones", cuponesRouter);
 app.use(errorHandler);
 
 export default app;

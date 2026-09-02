@@ -141,7 +141,8 @@ function inspectQueryCatalog(filePath, sourceFile, violations) {
         !isConst ||
         !ts.isIdentifier(declaration.name) ||
         declaration.initializer === undefined ||
-        !ts.isStringLiteral(declaration.initializer)
+        (!ts.isStringLiteral(declaration.initializer) &&
+          !ts.isNoSubstitutionTemplateLiteral(declaration.initializer))
       ) {
         addViolation(
           violations,

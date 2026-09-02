@@ -6,13 +6,13 @@ Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de 
 
 ## 📈 Estado General del Proyecto
 
-- **Fase Actual:** `PAUSA DE HANDOFF — TASK-002b, health sin validar`
-- **Progreso Global:** `2/7 tareas`
-- **Última Actualización:** 1 de Septiembre de 2026
+- **Fase Actual:** `TASK-005 — Pendiente de queries de Viajeros y Finanzas`
+- **Progreso Global:** `4/7 tareas`
+- **Última Actualización:** 2 de Septiembre de 2026
 
 ```
 Planeación:     [████████████████████] Cerrada
-Implementación: [██████░░░░░░░░░░░░░░] 2/7 tareas
+Implementación: [███████████░░░░░░░░░] 4/7 tareas
 ```
 
 > El progreso se mide en **tareas con `npm test` y `npm run build` en verde**, no en checkboxes marcados.
@@ -25,9 +25,7 @@ Implementación: [██████░░░░░░░░░░░░░░] 
 ### 📌 Backlog (Por Iniciar)
 | ID | Tarea | Agente | Depende de | Paso del loop | Especificación |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| `TASK-003` | Módulo de Reservas | Backend + QA | `TASK-002b` | — | [TASK-003](./tasks/TASK-003-reservas.md) |
-| `TASK-004` | Módulo de Cupones | Backend + QA | `TASK-003` | — | [TASK-004](./tasks/TASK-004-cupones.md) |
-| `TASK-005` | Módulos Viajeros y Finanzas | Backend + QA | `TASK-002b` | — | [TASK-005](./tasks/TASK-005-viajeros-finanzas.md) |
+| `TASK-005` | Módulos Viajeros y Finanzas | Backend | `TASK-004` | — | [TASK-005](./tasks/TASK-005-viajeros-finanzas.md) |
 | `TASK-006` | Consolidación de la suite y cobertura | QA | `TASK-005` | — | [TASK-006](./tasks/TASK-006-integration-tests.md) |
 
 > **La columna "Paso del loop"** dice quién tiene el balón: `1` contrato · `2` QA escribiendo tests ·
@@ -80,6 +78,8 @@ escribe SQL; no existe `DATABASE_SCHEMA.md`; Backend no ve tests; auth actual so
 ---
 
 ### ✅ Completadas
+- [x] **TASK-004 — Módulo de Cupones.** Endpoint unificado y rutas directas (`hotel`, `vuelo`, `auto`); consultas aprobadas `Q-CUP-01` a `Q-CUP-04`; verificación de agente `Q-AGE-01`; schemas Zod y tipado estricto sin `any`; gate de invariantes, linter y compilador en verde; montado en `/api/v1/cupones`.
+- [x] **TASK-003 — Módulo de Reservas.** Listado y conteo con `Q-RES-01` y `Q-RES-02`; 24/19 parámetros posicionales en paralelo; normalización de servicios y nombres; filtros temporales estrictos; montado en `/api/v1/reservas`; gate de invariantes, linter y compilador en verde.
 - [x] **TASK-002 — Core DB, entorno, errores y auth preparada para token.** `build`, `lint`,
   `check:invariants` y suite verdes; 6 archivos/28 pruebas; mutación de validación UUID roja y
   reversión verde; 7/7 entregables presentes.

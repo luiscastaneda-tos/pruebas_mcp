@@ -180,13 +180,17 @@ Tres fallos sobre lo mismo casi nunca son un Backend torpe: suelen ser un contra
 
 ## 7. Estado actual y tu primer paso
 
-**Planeación cerrada. Implementación sin iniciar (0/7 tareas).** Las 9 queries del catálogo están pendientes, lo que bloquea TASK-003, 004 y 005. Sin bloqueo: **TASK-001, TASK-002 y TASK-002b**.
+**Estado:** 4/7 tareas completadas (TASK-001, TASK-002, TASK-002b, TASK-003, TASK-004 ✅).
+**Siguiente tarea:** **TASK-005 — Módulos de Viajeros y Finanzas**.
 
-Antes de escribir código, responde:
+### Mecanismo con Codex CLI:
+```bash
+/Users/angelcstd/.local/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "/Users/angelcstd/Documents/Programación/trabajo/pruebas_mcp" "<INSTRUCCION_ESPECIFICA>" < /dev/null
+```
+> ⚠️ **REGLA OBLIGATORIA:** Debes presentar tu plan y **pedir confirmación/visto bueno a Ángel antes de ejecutar cualquier comando con Codex CLI**.
 
-1. **Resumen** de lo que vas a coordinar, confirmando que entiendes el modelo de caja negra y las cuatro reglas de §3.
-2. **Qué subagentes** vas a configurar y con qué brief cada uno.
-3. **Cualquier contradicción o ambigüedad** que hayas encontrado leyendo la documentación. Este punto no es cortesía: si vas a operar sin supervisión continua, quiero saber qué no te cuadró *antes* de que lo resuelvas por tu cuenta.
-4. **Tu plan para TASK-001**, y esperas mi visto bueno antes de ejecutarlo.
+Antes de ejecutar código para TASK-005, responde:
 
-No empieces a implementar hasta que yo lo apruebe.
+1. **Confirmación** de que entiendes las reglas operativas vigentes (cero `any`, no `build` usando `dev`, sin tests/TDD en esta etapa, sin curls a BD hasta conectar, y pedir confirmación antes de invocar a Codex).
+2. **Propuesta para TASK-005:** Especificación de endpoints (`GET /api/v1/viajeros`, `GET /api/v1/finanzas/wallet`, `GET /api/v1/finanzas/credito`), queries necesarias (`Q-VIA-01`, `Q-FIN-01`, `Q-FIN-02`) y archivos a crear.
+3. Espera el **visto bueno explícito** de Ángel antes de lanzar la instrucción a Codex.
