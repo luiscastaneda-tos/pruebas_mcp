@@ -110,10 +110,19 @@ Esto **no persiste** si se reinicia el servicio de MySQL — para que quede fijo
 query ya acepta los tres formatos por diseño (`id_solicitud` OR `id_booking` OR `id_relacion`) — es
 solo una aclaración operativa para quien pruebe, no requiere cambio de código.
 
-**Pendiente sin resolver, no bloqueante para hoy:** `API_CONTRACT.md §2.2` (Cupones) todavía tiene
-la nota *"🔎 Pendiente de confirmación de Ángel"* sobre la forma de los 3 cupones específicos — es
-anterior a esta sesión, no se tocó hoy. Antes de mandar el contrato a un tercero (ej. el jefe de
-Ángel), esa nota debería resolverse o quitarse.
+**Cupones — vuelo y auto, verificados también en vivo (2026-09-03):** usando `id_relacion` real
+sacado de `reservas` filtrando por `tipo_servicio`, se probó `Q-CUP-03` (vuelo) y `Q-CUP-04` (auto)
+contra MySQL real. Ambos responden sin error y con la forma documentada. Con esto, `API_CONTRACT.md
+§2.2` quedó **confirmado** (ya no dice "pendiente") — los 3 cupones (hotel, vuelo, auto) verificados
+contra datos reales el mismo día.
+
+> 📌 **Punto abierto, decisión de Ángel:** en el cupón de vuelo, `origen.iata`/`destino.iata` mapea
+> directo `departure_airport`/`arrival_airport` sin parsear (`cleanText(row.departure_airport)`,
+> `cupones.service.ts`). En al menos un caso real, esa columna trae la descripción completa del
+> aeropuerto (`"Monterrey, Nuevo Leon, Mexico (MTY/MMMY General Mariano Escobedo Intl.)"`), no un
+> código de 3 letras como sugiere el ejemplo del contrato (`"GDL"`). No se tocó — falta que Ángel
+> decida si se extrae el código IATA de esa columna (ej. regex sobre el paréntesis) o se deja tal
+> cual porque es información real, no un bug.
 
 ---
 

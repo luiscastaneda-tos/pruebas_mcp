@@ -144,10 +144,11 @@ En cualquier otro código, `details` se omite.
 
 ### 2.2. Cupones
 
-> 🔎 **Pendiente de confirmación de Ángel.** Las formas de los tres cupones específicos (hotel,
-> vuelo, auto) se redactaron desde los criterios de [TASK-004](./tasks/TASK-004-cupones.md) para
-> desbloquear a QA. Confírmalas — o corrígelas — al entregar `Q-CUP-02` … `Q-CUP-04`, porque son
-> las que determinan qué columnas deben devolver esas queries.
+> ✅ **Confirmado contra datos reales el 2026-09-03.** Las formas de los tres cupones específicos
+> (hotel, vuelo, auto) se verificaron en vivo contra MySQL real: hotel con 3 casos distintos, vuelo
+> y auto con 1 caso cada uno, todos para el mismo agente. La estructura documentada abajo coincide
+> con lo que devuelven `Q-CUP-02`, `Q-CUP-03` y `Q-CUP-04`. Detalle de la verificación en
+> `HANDOFF.md §3`.
 
 #### `GET /api/v1/cupones/:id`
 - **Propósito:** Resuelve y retorna el cupón unificado para cualquier identificador (`id_solicitud` tipo `sol-...`, `id_booking` o `id_relacion`).
