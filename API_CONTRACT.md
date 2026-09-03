@@ -279,7 +279,9 @@ En cualquier otro código, `details` se omite.
 #### `GET /api/v1/viajeros`
 - **Propósito:** Directorio optimizado de colaboradores y pasajeros registrados de la agencia autenticada.
 - **Parámetros (Query):**
-  - `busqueda` (*string*, opcional): Filtro por nombre, apellido o correo.
+  - `busqueda` (*string*, opcional): Filtro por nombre, apellido, correo o número de empleado.
+- **Límite:** la respuesta trae como máximo **20** resultados (tope fijo, no paginado — sin `OFFSET`
+  ni conteo total). Si hay más de 20 coincidencias, usa `busqueda` para acotar.
 - **Respuesta (200 OK):**
   ```json
   {
@@ -301,25 +303,24 @@ En cualquier otro código, `details` se omite.
 ### 2.4. Finanzas
 
 #### `GET /api/v1/finanzas/saldo-credito`
-- **Propósito:** Consulta instantánea de estado de cuenta: wallet (saldos a favor disponibles) y estado de línea de crédito corporativo.
+- **Propósito:** Consulta instantánea de estado de cuenta: wallet (saldo a favor disponible) y línea de crédito corporativo.
 - **Respuesta (200 OK):**
   ```json
   {
     "success": true,
     "data": {
       "wallet": {
-        "saldo_a_favor_disponible": 24500.00,
-        "desglose": [
-          { "metodo": "Transferencia", "saldo": 20000.00 },
-          { "metodo": "Tarjeta", "saldo": 4500.00 }
-        ]
+        "saldo_a_favor_disponible": 24500.00
       },
       "credito": {
-        "tiene_credito": true,
         "limite_credito": 100000.00,
-        "credito_disponible": 68000.00,
-        "credito_utilizado": 32000.00
+        "credito_disponible": 68000.00
       }
     }
   }
   ```
+  > **Simplificado el 2026-09-03 (decisión de Ángel):** se quitó `desglose` de wallet (no hay
+  > columna de método de pago disponible en la query aprobada) y `tiene_credito` /
+  > `credito_utilizado` de crédito (no hay bandera de "crédito activo" en la tabla `agentes`;
+  > queda suspendido hasta que se maneje esa información). Ver `Q-FIN-01` y `Q-FIN-02` en
+  > `QUERIES.md`.

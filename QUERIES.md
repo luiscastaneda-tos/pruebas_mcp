@@ -40,9 +40,9 @@ lo detectan tests escritos por el mismo agente.
 | `Q-CUP-02` | Cupones | Detalle de cupón de hotel | ✅ Aprobada |
 | `Q-CUP-03` | Cupones | Detalle de cupón de vuelo (cabecera y tramos) | ✅ Aprobada |
 | `Q-CUP-04` | Cupones | Detalle de cupón de auto | ✅ Aprobada |
-| `Q-VIA-01` | Viajeros | Directorio de viajeros por agente | ⏳ Pendiente |
-| `Q-FIN-01` | Finanzas | Desglose de wallet / saldos a favor | ⏳ Pendiente |
-| `Q-FIN-02` | Finanzas | Estado de línea de crédito | ⏳ Pendiente |
+| `Q-VIA-01` | Viajeros | Directorio de viajeros por agente | ✅ Aprobada |
+| `Q-FIN-01` | Finanzas | Saldo a favor (wallet) | ✅ Aprobada |
+| `Q-FIN-02` | Finanzas | Estado de línea de crédito | ✅ Aprobada |
 
 **Leyenda:** ⏳ Pendiente de Ángel · ✅ Aprobada · 🔄 En revisión
 
@@ -626,6 +626,196 @@ SELECT eq_mano, eq_personal, eq_documentado, id_vuelo, flight_number, airline,
 FROM vuelos 
 WHERE id_viaje_aereo = ?;
 ```
+
+---
+
+### `Q-VIA-01` — Directorio de viajeros por agente
+
+**Módulo:** `viajeros` · **Estado:** ✅ Aprobada · **Entregada:** 2026-09-03
+
+**Propósito:** Directorio de viajeros asociados a la agencia autenticada, con búsqueda opcional por nombre, correo o número de empleado.
+
+**SQL:**
+```sql
+SELECT
+    av.id_agente,
+    av.id_viajero,
+    v.primer_nombre,
+    v.segundo_nombre,
+    v.apellido_paterno,
+    v.apellido_materno,
+    v.correo,
+    v.telefono,
+    v.numero_empleado
+FROM agentes_viajeros av
+LEFT JOIN viajeros v ON v.id_viajero = av.id_viajero
+WHERE
+    v.activo = 1
+    AND av.id_agente = ?
+    AND (
+        ? IS NULL
+        OR REPLACE(TRIM(CONCAT_WS(' ', TRIM(v.primer_nombre), TRIM(v.segundo_nombre), TRIM(v.apellido_paterno), TRIM(v.apellido_materno))), '  ', ' ') LIKE CONCAT('%', ?, '%')
+        OR v.correo LIKE CONCAT('%', ?, '%')
+        OR v.numero_empleado LIKE CONCAT('%', ?, '%')
+    )
+LIMIT 20;
+```
+
+> **Revisión 2026-09-03 (decisión de Ángel):** se agregó `LIMIT 20` — sin esto, un agente con
+> miles de viajeros registrados devolvía el directorio completo en una sola respuesta. Es un tope
+> fijo, no paginación: no hay `OFFSET` ni conteo total. Si el cliente necesita resultados más
+> específicos, usa `busqueda` para acotar. No confundir con `Q-RES-01`/`Q-RES-02`, que sí pagina.
+
+**Parámetros (en orden posicional):**
+
+| # | Nombre | Tipo | Obligatorio | Notas |
+| :-- | :--- | :--- | :---: | :--- |
+| 1 | `id_agente` | `string` (UUID) | ✅ | Siempre desde `req.context`, nunca del input del cliente. |
+| 2 | `busqueda` | `string \| null` | | `null` omite el filtro por completo. |
+| 3 | `busqueda` | `string \| null` | | Mismo valor que #2; compara contra nombre completo normalizado. |
+| 4 | `busqueda` | `string \| null` | | Mismo valor que #2; compara contra `correo`. |
+| 5 | `busqueda` | `string \| null` | | Mismo valor que #2; compara contra `numero_empleado`. |
+
+**Forma de la fila devuelta** (el agente mapea **solo** los campos del contrato — `id_agente` se ignora, no forma parte del DTO):
+
+```ts
+{
+  id_agente: string;
+  id_viajero: string;
+  primer_nombre: string | null;
+  segundo_nombre: string | null;
+  apellido_paterno: string | null;
+  apellido_materno: string | null;
+  correo: string | null;
+  telefono: string | null;
+  numero_empleado: string | null;
+}
+```
+
+> **Corrección 2026-09-03 (verificado en pruebas contra la BD real):** las 4 partes del nombre
+> pueden venir en `NULL`, no solo `''`. El mapeo a `nombre_completo` debe tolerar `NULL` en
+> cualquiera de las 4, igual que ya tolera `NULL` en `correo`/`telefono`/`numero_empleado`.
+
+**Filas de ejemplo — anonimizadas:**
+
+```json
+[
+  { "id_agente": "age-10000000-0000-4000-8000-000000000001", "id_viajero": "via-10000000-0000-4000-8000-000000000001", "primer_nombre": "EDUARDO", "segundo_nombre": "", "apellido_paterno": "MENDOZA", "apellido_materno": "", "correo": null, "telefono": null, "numero_empleado": null },
+  { "id_agente": "age-10000000-0000-4000-8000-000000000001", "id_viajero": "via-10000000-0000-4000-8000-000000000002", "primer_nombre": "SOFÍA", "segundo_nombre": "ELENA", "apellido_paterno": "TORRES", "apellido_materno": "IBARRA", "correo": null, "telefono": null, "numero_empleado": null },
+  { "id_agente": "age-10000000-0000-4000-8000-000000000001", "id_viajero": "via-10000000-0000-4000-8000-000000000003", "primer_nombre": "MATEO", "segundo_nombre": "ISAAC", "apellido_paterno": "VARGAS", "apellido_materno": "PRIETO", "correo": "mateo.vargas@ejemplo.com", "telefono": "5512345678", "numero_empleado": "234" },
+  { "id_agente": "age-10000000-0000-4000-8000-000000000001", "id_viajero": "via-10000000-0000-4000-8000-000000000004", "primer_nombre": "RENATA", "segundo_nombre": "ISABEL", "apellido_paterno": "OCHOA", "apellido_materno": "DELGADO", "correo": "RENATA.OCHOA@EJEMPLO.MX", "telefono": null, "numero_empleado": null },
+  { "id_agente": "age-10000000-0000-4000-8000-000000000001", "id_viajero": "via-10000000-0000-4000-8000-000000000005", "primer_nombre": "GERARDO", "segundo_nombre": "", "apellido_paterno": "SALAZAR", "apellido_materno": "SALAZAR", "correo": "gerardo.salazar@ejemplo.mx", "telefono": "6141234567", "numero_empleado": null }
+]
+```
+
+**Reglas de negocio que la query ya aplica:**
+- Filtra por agencia autenticada (`av.id_agente = ?`) y solo viajeros activos (`v.activo = 1`).
+- `LEFT JOIN` + `v.activo = 1` en el `WHERE` descarta implícitamente cualquier `av.id_viajero` huérfano sin fila en `viajeros` (se comporta como `INNER JOIN`).
+- La búsqueda es un único término que compara contra nombre completo normalizado, correo y número de empleado (coincidencia parcial, `OR`).
+
+**Notas / advertencias:**
+- `correo`, `telefono` y `numero_empleado` pueden ser `NULL` — confirmado por Ángel. El mapeo al DTO debe tolerarlo.
+- La query **no** devuelve `nombre_completo` armado — el service debe construirlo concatenando `primer_nombre`, `segundo_nombre`, `apellido_paterno`, `apellido_materno`, recortando extremos y colapsando espacios repetidos cuando alguna parte venga vacía (mismo patrón de normalización ya usado en `Q-RES-01` para `nombre_viajero`).
+- `id_agente` viene en el `SELECT` solo por trazabilidad; no es parte del DTO de salida y no debe mapearse.
+
+---
+
+### `Q-FIN-01` — Desglose de wallet / saldo a favor
+
+**Módulo:** `finanzas` · **Estado:** ✅ Aprobada · **Entregada:** 2026-09-03
+
+**Propósito:** Saldo a favor disponible del agente autenticado (suma de saldos vigentes, no cancelados, que no son crédito).
+
+**SQL:**
+```sql
+SELECT COALESCE(SUM(saldo), 0) AS total_saldo_favor
+FROM saldos_a_favor
+WHERE id_agente = ?
+  AND is_wallet_credito <> 1
+  AND is_cancelado = 0
+  AND activo = 1;
+```
+
+> **Corrección 2026-09-03 (bug real, detectado en pruebas contra la BD):** la versión anterior
+> dejaba `id_agente` suelto en el `SELECT` junto al `SUM()` sin `GROUP BY`. Bajo
+> `sql_mode=only_full_group_by` eso truena (`ER_MIX_OF_GROUP_FUNC_AND_FIELDS`). Se quitó `id_agente`
+> del `SELECT` — no se usaba en el DTO de salida de todos modos.
+
+**Parámetros:**
+1. `id_agente` (`string` UUID) — siempre desde `req.context`.
+
+**Forma de la fila devuelta** (siempre exactamente una fila):
+
+```ts
+{
+  total_saldo_favor: number;
+}
+```
+
+**Filas de ejemplo — anonimizadas:**
+
+```json
+[
+  { "total_saldo_favor": 4541.40, "id_agente": "age-20000000-0000-4000-8000-000000000001" },
+  { "total_saldo_favor": 336.40, "id_agente": "age-20000000-0000-4000-8000-000000000002" },
+  { "total_saldo_favor": 0.00, "id_agente": "age-20000000-0000-4000-8000-000000000003" }
+]
+```
+
+**Reglas de negocio que la query ya aplica:**
+- Solo suma saldos activos, no cancelados y que no son de tipo crédito (`is_wallet_credito <> 1`).
+- Sin `GROUP BY`: el `SUM()` + `COALESCE` garantizan **siempre una sola fila**, con `0` cuando el agente no tiene saldos — el service no necesita manejar el caso de "cero filas".
+
+**Notas / advertencias:**
+- Mapea a `wallet.saldo_a_favor_disponible` en el contrato (`API_CONTRACT.md §2.4`, simplificado el 2026-09-03: ya no incluye `desglose` por método de pago, esa columna no existe en la fuente).
+
+---
+
+### `Q-FIN-02` — Estado de línea de crédito
+
+**Módulo:** `finanzas` · **Estado:** ✅ Aprobada · **Entregada:** 2026-09-03
+
+**Propósito:** Crédito disponible y límite de línea de crédito corporativo del agente autenticado.
+
+**SQL:**
+```sql
+SELECT saldo AS total_saldo_credito, id_agente, linea_credito
+FROM agentes
+WHERE id_agente = ?;
+```
+
+**Parámetros:**
+1. `id_agente` (`string` UUID) — siempre desde `req.context`.
+
+**Forma de la fila devuelta:**
+
+```ts
+{
+  total_saldo_credito: number;
+  id_agente: string;
+  linea_credito: number | null;
+}
+```
+
+**Filas de ejemplo — anonimizadas:**
+
+```json
+[
+  { "total_saldo_credito": 46759.60, "id_agente": "age-20000000-0000-4000-8000-000000000001", "linea_credito": 134560.00 },
+  { "total_saldo_credito": 0.00, "id_agente": "age-20000000-0000-4000-8000-000000000002", "linea_credito": 50000.00 },
+  { "total_saldo_credito": 0.00, "id_agente": "age-20000000-0000-4000-8000-000000000003", "linea_credito": null },
+  { "total_saldo_credito": 164117.20, "id_agente": "age-20000000-0000-4000-8000-000000000004", "linea_credito": null }
+]
+```
+
+**Reglas de negocio que la query ya aplica:**
+- Ninguna transformación: `saldo` **es** el crédito disponible (confirmado por Ángel), tal cual.
+
+**Notas / advertencias:**
+- `linea_credito` puede ser `NULL` cuando el agente no tiene línea de crédito configurada — el DTO de salida (`limite_credito`) debe tolerarlo (`number | null`), no forzar `0`.
+- La cuarta fila de ejemplo es un caso real donde `total_saldo_credito` es positivo con `linea_credito` en `NULL` — dato inconsistente de origen, pero el service **no lo corrige ni lo descarta**: se mapea tal cual, igual que cualquier otra fila.
+- `tiene_credito` y `credito_utilizado` quedaron **suspendidos** del contrato (decisión de Ángel, 2026-09-03): no hay bandera de "crédito activo" en `agentes`. Si se necesitan más adelante, requieren una nueva *Solicitud de Query*, no se derivan aquí.
+- Contrato de salida esperado: `{ "credito": { "limite_credito": linea_credito, "credito_disponible": total_saldo_credito } }`.
 
 ---
 

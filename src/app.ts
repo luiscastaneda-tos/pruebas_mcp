@@ -4,7 +4,9 @@ import express from "express";
 import { HeaderContextResolver, createAuthMiddleware } from "./core/middleware/auth.js";
 import { errorHandler } from "./core/middleware/errorHandler.js";
 import { cuponesRouter } from "./modules/cupones/cupones.router.js";
+import { finanzasRouter } from "./modules/finanzas/finanzas.router.js";
 import { reservasRouter } from "./modules/reservas/reservas.router.js";
+import { viajerosRouter } from "./modules/viajeros/viajeros.router.js";
 
 export const app = express();
 
@@ -31,6 +33,8 @@ app.use(express.json());
 app.use(createAuthMiddleware(new HeaderContextResolver()));
 app.use("/api/v1/reservas", reservasRouter);
 app.use("/api/v1/cupones", cuponesRouter);
+app.use("/api/v1/viajeros", viajerosRouter);
+app.use("/api/v1/finanzas", finanzasRouter);
 app.use(errorHandler);
 
 export default app;

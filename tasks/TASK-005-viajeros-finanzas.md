@@ -1,17 +1,20 @@
 # 📋 TASK-005: Módulos de Viajeros y Finanzas (Optimización de Queries)
 
-- **Estado:** `BACKLOG`
-- **Agente Asignado:** `Backend` & `QA`
+- **Estado:** `LISTA` — `Q-VIA-01`, `Q-FIN-01` y `Q-FIN-02` aprobadas el 2026-09-03.
+- **Agente Asignado:** `Backend` (sin `QA`/TDD en esta etapa — decisión vigente de Ángel)
 - **Revisor:** `Lead`
 - **Dependencias:** `TASK-002b`
 
 ---
 
 ## 1. Objetivo
-Construir los módulos de **Viajeros** (`/viajeros`) y **Finanzas** (`/finanzas/saldo-credito`) sobre las queries optimizadas del catálogo.
+Construir los módulos de **Viajeros** (`/viajeros`) y **Finanzas** (`/finanzas/saldo-credito`) sobre las queries del catálogo.
 
-> ⛔ **Bloqueada hasta recibir `Q-VIA-01`, `Q-FIN-01` y `Q-FIN-02`** ([QUERIES.md](../QUERIES.md)).
-> El rediseño y la optimización del SQL los hace Ángel. El agente no conoce el esquema.
+> ✅ **Desbloqueada:** `Q-VIA-01`, `Q-FIN-01` y `Q-FIN-02` aprobadas en [QUERIES.md](../QUERIES.md).
+> **Contrato de finanzas simplificado el 2026-09-03** (ver `API_CONTRACT.md §2.4`): wallet ya no
+> lleva `desglose` por método de pago; crédito ya no lleva `tiene_credito` ni `credito_utilizado`
+> (sin bandera de crédito activo en el origen). La forma vigente es:
+> `{ wallet: { saldo_a_favor_disponible }, credito: { limite_credito, credito_disponible } }`.
 
 ---
 
@@ -37,5 +40,7 @@ Construir los módulos de **Viajeros** (`/viajeros`) y **Finanzas** (`/finanzas/
 ## 3. Entregables
 1. `src/modules/viajeros/` (schema, repo, service, controller, router)
 2. `src/modules/finanzas/` (schema, repo, service, controller, router)
-3. `tests/modules/viajeros.test.ts`
-4. `tests/modules/finanzas.test.ts`
+
+> `tests/modules/*.test.ts` **no aplica en esta etapa** — TDD/QA suspendido por decisión vigente de
+> Ángel (`HANDOFF.md §1.3`). Validación vía `npm run check:invariants`, `npm run lint` y
+> `npx tsc --noEmit`.

@@ -6,13 +6,13 @@ Dashboard maestro de seguimiento de sprints, estado de tareas y asignaciones de 
 
 ## 📈 Estado General del Proyecto
 
-- **Fase Actual:** `TASK-005 — Pendiente de queries de Viajeros y Finanzas`
-- **Progreso Global:** `4/7 tareas`
-- **Última Actualización:** 2 de Septiembre de 2026
+- **Fase Actual:** `TASK-006 — Consolidación de la suite y cobertura` (QA/TDD suspendido por decisión vigente de Ángel — ver `HANDOFF.md §1.3`; no se arranca hasta que se retome)
+- **Progreso Global:** `5/7 tareas`
+- **Última Actualización:** 3 de Septiembre de 2026
 
 ```
 Planeación:     [████████████████████] Cerrada
-Implementación: [███████████░░░░░░░░░] 4/7 tareas
+Implementación: [██████████████░░░░░░] 5/7 tareas
 ```
 
 > El progreso se mide en **tareas con `npm test` y `npm run build` en verde**, no en checkboxes marcados.
@@ -25,7 +25,6 @@ Implementación: [███████████░░░░░░░░░] 
 ### 📌 Backlog (Por Iniciar)
 | ID | Tarea | Agente | Depende de | Paso del loop | Especificación |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| `TASK-005` | Módulos Viajeros y Finanzas | Backend | `TASK-004` | — | [TASK-005](./tasks/TASK-005-viajeros-finanzas.md) |
 | `TASK-006` | Consolidación de la suite y cobertura | QA | `TASK-005` | — | [TASK-006](./tasks/TASK-006-integration-tests.md) |
 
 > **La columna "Paso del loop"** dice quién tiene el balón: `1` contrato · `2` QA escribiendo tests ·
@@ -78,6 +77,17 @@ escribe SQL; no existe `DATABASE_SCHEMA.md`; Backend no ve tests; auth actual so
 ---
 
 ### ✅ Completadas
+- [x] **TASK-005 — Módulos de Viajeros y Finanzas.** `GET /api/v1/viajeros` (`Q-VIA-01`, búsqueda
+  opcional por nombre/correo/número de empleado) y `GET /api/v1/finanzas/saldo-credito` (`Q-FIN-01` +
+  `Q-FIN-02` en paralelo con `Promise.all`); contrato de finanzas simplificado el 2026-09-03 (sin
+  `desglose`, sin `tiene_credito`/`credito_utilizado` — ver `API_CONTRACT.md §2.4`); `nombre_completo`
+  armado en el service con trim + colapso de espacios; cero `any`; gate de invariantes, linter y
+  `tsc --noEmit` en verde (verificado por el Lead, no solo reportado por Codex); montado en
+  `/api/v1/viajeros` y `/api/v1/finanzas`. Sin `tests/modules/*.test.ts` — TDD/QA suspendido en esta
+  etapa. **Probado contra MySQL real el 2026-09-03** (primera vez en el proyecto) — encontró y
+  corrigió 4 bugs invisibles para `mockExecutor`: `Q-FIN-01` sin `GROUP BY` válido, nombres `NULL`
+  en `viajeros`, y decimales/fechas del driver mysql2 (`decimalNumbers`/`dateStrings` en `db.ts`,
+  este último también corrige `reservas` desde TASK-003). Detalle completo en `HANDOFF.md §3`.
 - [x] **TASK-004 — Módulo de Cupones.** Endpoint unificado y rutas directas (`hotel`, `vuelo`, `auto`); consultas aprobadas `Q-CUP-01` a `Q-CUP-04`; verificación de agente `Q-AGE-01`; schemas Zod y tipado estricto sin `any`; gate de invariantes, linter y compilador en verde; montado en `/api/v1/cupones`.
 - [x] **TASK-003 — Módulo de Reservas.** Listado y conteo con `Q-RES-01` y `Q-RES-02`; 24/19 parámetros posicionales en paralelo; normalización de servicios y nombres; filtros temporales estrictos; montado en `/api/v1/reservas`; gate de invariantes, linter y compilador en verde.
 - [x] **TASK-002 — Core DB, entorno, errores y auth preparada para token.** `build`, `lint`,

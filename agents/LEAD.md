@@ -184,9 +184,15 @@ Tres fallos sobre lo mismo casi nunca son un Backend torpe: suelen ser un contra
 **Siguiente tarea:** **TASK-005 — Módulos de Viajeros y Finanzas**.
 
 ### Mecanismo con Codex CLI:
+Ángel trabaja desde dos máquinas. Usa la variante que corresponda a la máquina activa — identifícala por el formato del working directory (`/Users/angelcstd/...` → macOS, `C:\Users\Operaciones\...` → Windows):
 ```bash
+# macOS
 /Users/angelcstd/.local/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "/Users/angelcstd/Documents/Programación/trabajo/pruebas_mcp" "<INSTRUCCION_ESPECIFICA>" < /dev/null
+
+# Windows
+codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -C "C:\Users\Operaciones\Desktop\MIA_OFICIAL\pruebas_mcp" "<INSTRUCCION_ESPECIFICA>" < /dev/null
 ```
+(`codex` ya está en el `PATH` en Windows, no hace falta la ruta completa al binario.)
 > ⚠️ **REGLA OBLIGATORIA:** Debes presentar tu plan y **pedir confirmación/visto bueno a Ángel antes de ejecutar cualquier comando con Codex CLI**.
 
 Antes de ejecutar código para TASK-005, responde:
